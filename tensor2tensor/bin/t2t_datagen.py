@@ -56,8 +56,10 @@ import tensorflow as tf  # pylint: disable=g-import-not-at-top
 
 
 flags = tf.flags
+# 1iyc: Flag processing module (cf. --problem)
 FLAGS = flags.FLAGS
 
+# 1iyc: DEFINE_[type]([flags], [default], [descriptions])
 flags.DEFINE_string("data_dir", "", "Data directory.")
 flags.DEFINE_string("tmp_dir", "/tmp/t2t_datagen",
                     "Temporary storage directory.")
@@ -146,6 +148,7 @@ def main(_):
   usr_dir.import_usr_dir(FLAGS.t2t_usr_dir)
 
   # Calculate the list of problems to generate.
+  # 1iyc: Can use --exclude_problems and wildcard on --problem flag also ','
   problems = sorted(
       list(_SUPPORTED_PROBLEM_GENERATORS) + registry.list_problems())
   for exclude in FLAGS.exclude_problems.split(","):
@@ -243,6 +246,7 @@ def generate_data_for_registered_problem(problem_name):
   task_id = None if FLAGS.task_id < 0 else FLAGS.task_id
   data_dir = os.path.expanduser(FLAGS.data_dir)
   tmp_dir = os.path.expanduser(FLAGS.tmp_dir)
+  # 1iyc: Maybe in case of multiple process, make task_id
   if task_id is None and problem.multiprocess_generate:
     if FLAGS.task_id_start != -1:
       assert FLAGS.task_id_end != -1
@@ -257,6 +261,7 @@ def generate_data_for_registered_problem(problem_name):
             for task_id in range(task_id_start, task_id_end)]
     pool.map(generate_data_in_process, args)
   else:
+    # 1iyc: Generate Data Set in registry.problem([problem_name])
     problem.generate_data(data_dir, tmp_dir, task_id)
 
 if __name__ == "__main__":
